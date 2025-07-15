@@ -1,0 +1,17 @@
+cluster_name                    = 
+environment                     = 
+
+aws_profile                     = 
+cluster_region                  = 
+assume_role_arn                 = 
+
+github_app_id                   = 
+github_app_installation_id      = 
+
+repo_github_url_icp             = 
+target_revision_icp             = 
+chart_path_icp                  = 
+server_image_icp                = 
+image_tag_icp                   = 
+acm_certificate_arn             = 
+github_app_private_key          = 
