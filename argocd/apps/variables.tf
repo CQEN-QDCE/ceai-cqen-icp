@@ -100,12 +100,12 @@ variable "image_tag_icp" {
   type        = string
 } 
 
-variable "repo_github_url" {
+/* variable "repo_github_url" {
   description = "The URL of the repository"
   type        = string
 }
 
-/*variable "target_revision" {
+variable "target_revision" {
   description = "The target revision of the repository"
   type        = string
 }*/
