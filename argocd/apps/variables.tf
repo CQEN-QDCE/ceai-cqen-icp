@@ -46,15 +46,16 @@ variable "acm_certificate_arn" {
   type        = string
 }
 
+/*
 variable "repo_github_ifra_url" {
   description = "The URL of the repository"
   type        = string
 }
 
-/*variable "repo_github_ifra_target_revision" {
+variable "repo_github_ifra_target_revision" {
   description = "The target revision of the repository"
   type        = string
-}*/
+}
 
 variable "github_app_id" {
   description = "GitHub App ID"
@@ -72,7 +73,7 @@ variable "github_app_private_key" {
   description = "GitHub App Private Key"
   type        = string
   sensitive   = true
-}
+} */
 
 variable "repo_github_url_icp" {
   description = "The URL of the repository de l'ICP EJBCA"

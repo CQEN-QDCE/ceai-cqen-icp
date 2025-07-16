@@ -37,7 +37,7 @@ resource "kubernetes_manifest" "argocd_project" {
 }
 
 
-resource "kubernetes_manifest" "argocd_github_app_secret" {
+/*resource "kubernetes_manifest" "argocd_github_app_secret" {
   manifest = {
     apiVersion = "v1"
     kind       = "Secret"
@@ -59,3 +59,4 @@ resource "kubernetes_manifest" "argocd_github_app_secret" {
     }
   }
 }
+*/
