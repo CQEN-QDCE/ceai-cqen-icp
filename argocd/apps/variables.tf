@@ -71,19 +71,19 @@ variable "image_tag" {
   type        = string
 } 
 
-variable "database_jdbc_url" {
+variable "DATABASE_JDBC_URL" {
   description = "JDBC URL for the database"
   type        = string
   sensitive = true
 }
 
-variable "database_user" {
+variable "DATABASE_USER" {
   description = "Database user for the ICP EJBCA"
   type        = string
   sensitive = true
 }
 
-variable "database_password" {
+variable "DATABASE_PASSWORD" {
   description = "Database password for the ICP EJBCA"
   type        = string
   sensitive   = true

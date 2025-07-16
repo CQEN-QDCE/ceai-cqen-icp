@@ -31,9 +31,9 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
               }
             }
             database = {
-              database_jdbc_url = var.database_jdbc_url
-              database_user     = var.database_user
-              database_password = var.database_password
+              DATABASE_JDBC_URL = var.DATABASE_JDBC_URL
+              DATABASE_USER     = var.DATABASE_USER
+              DATABASE_PASSWORD = var.DATABASE_PASSWORD
             }
           })
         }
