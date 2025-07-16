@@ -1,3 +1,25 @@
+# File created using '.gitignore Generator' for Visual Studio Code: https://bit.ly/vscode-gig
+# Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,linux,terraform
+# Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,linux,terraform
+
+### Linux & Apple ###
+*~
+.DS_Store
+.AppleDouble
+
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
 # Local .terraform directories
 .terraform/
 
@@ -40,5 +62,79 @@ terraform.rc
 
 # Ignore macOS specific files
 .DS_Store
+.AppleDouble
+
 # Ignore Windows specific files
 Thumbs.db
+
+### VisualStudioCode ###
+.vscode
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+_tmp/
+.project
+.idea/
+*.tmproj
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+### VisualStudioCode ###
+.history
+.ionide
+
+## Built application files
+*.zip
+
+## Backup files
+*.bak
+*.swp
+*.tmp
+*.orig
+*~
+
+# Various IDEs
+.project
+.idea/
+*.tmproj
+.vscode/
+
+# Common VCS dirs
+.bzr/
+.bzrignore
+.hg/
+.hgignore
+.svn/
+
+# Compressed files
+*.tgz
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.lzma
+*.tar.Z
+*.tar.lzo
+*.tar.lz
+*.tar.lz4
+*.tar.lzop
+*.tar.zst
+*.tar.sz
+*.tar.zstd
+*.tar.xz
+*.tar.lzma
+*.tar.lzo
+*.tar.lz4
+*.zip  
+*.rar
+*.7z
+*.gz
+*.gzip
+*.xz
+*.lzma

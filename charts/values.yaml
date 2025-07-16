@@ -1,0 +1,298 @@
+# Default values for ejbca-community-helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+ejbca:
+  ## only applicable for quick setup of ephemeral test environments
+  useEphemeralH2Database: true
+  useH2Persistence: false
+  #existingH2PersistenceClaim: "database-data-claim"
+
+  importExternalCas: false
+  #externalCasSecret: managementca-secret
+  
+  ## not recommended: applicable only when direct HTTP access to EJBCA is enabled
+  importAppserverKeystore: false
+  #appserverKeystoreSecret: keystore-secret
+  importAppserverTruststore: false
+  #appserverTruststoreSecret: truststore-secret
+  
+  importEjbcaConfFiles: false
+  #ejbcaConfFilesSecret: ejbca-conf
+  #importConfigdumpStaged: false
+  #configdumpStagedSecret: configdump-staged-secret
+  #importConfigdumpInitialize: false
+  #configdumpInitializeSecret: configdump-initialize-secret
+  #superadminPasswordOverride: ""
+  env:
+    # for ephemeral test environments and only applicable to CA node
+    TLS_SETUP_ENABLED: "true"
+    # External RA, VA, or when you want to bootstrap a CA/superadmin credential to use
+    # TLS_SETUP_ENABLED: "later"
+
+    # database username and password are recommended to be input as secret
+    # DATABASE_JDBC_URL: ""
+
+    # Audit logging should only be enabled in CA node
+    LOG_AUDIT_TO_DB: false
+    # INFO, DEBUG, TRACE, ERROR
+    LOG_LEVEL_APP: "DEBUG"
+    LOG_LEVEL_SERVER: "DEBUG"
+
+    ## Observability
+    # The IP address where port 8090 will listen for requests to /health, /health/ready,
+    # /health/live and /metrics . Set this to 0.0.0.0 to bind to all container interfaces.
+    OBSERVABLE_BIND: "127.0.0.1"
+    # Set this to "true" to collect metrics and expose them at the /metrics endpoint for scraping.
+    METRICS_ENABLED: true
+    
+    ## Global OCSP configurations
+    OCSP_CHECK_SIGN_CERT_VALIDITY: true
+    OCSP_NON_EXISTING_IS_GOOD: false
+
+    ## SMTP configuration
+    # Specify the FQDN or IP Address of the SMTP host for EJBCA to send email notifications.
+    SMTP_DESTINATION: "localhost"
+    SMTP_DESTINATION_PORT: "25"
+    SMTP_FROM: no-reply@localhost
+    SMTP_TLS_ENABLED: true
+    # Used for Wildfly to connect using TLS to the SMTP server. This only supports public CA certificates.
+    SMTP_SSL_ENABLED: true
+    # The username used when authentication is required for SMTP server.
+    SMTP_USERNAME: ejbca-mail
+
+  #envRaw:
+  #  - name: DATABASE_USER
+  #    valueFrom:
+  #     secretKeyRef:
+  #       name: ejbcadbcredentials
+  #       key: database_user
+  #  - name: DATABASE_PASSWORD
+  #    valueFrom:
+  #     secretKeyRef:
+  #       name: ejbcadbcredentials
+  #       key: database_password
+  #  - name: PASSWORD_ENCRYPTION_KEY
+  #    valueFrom:
+  #     secretKeyRef:
+  #       name: ejbca-confidentiality-secrets
+  #       key: password_encrpytion_key
+  #  - name: EJBCA_CLI_DEFAULTPASSWORD
+  #    valueFrom:
+  #     secretKeyRef:
+  #       name: ejbca-confidentiality-secrets
+  #       key: cli_default_password
+  #  - name: SMTP_PASSWORD
+  #    valueFrom:
+  #     secretKeyRef:
+  #       name: ejbca-smtp-secrets
+  #       key: smtp_password
+
+  # Extra environment variables from ConfigMap or Secret resources
+  envFrom: []
+  #  - configMapRef:
+  #      name: env-configmap
+  #  - secretRef:
+  #      name: env-secrets
+  # Extra init containers to be added to the deployment
+  initContainers: []
+  # Extra sidecar containers to be added to the deployment
+  sidecarContainers: []
+  # Extra volumes to be added to the deployment
+  volumes: []
+  # Extra volume mounts to be added to the deployment
+  volumeMounts: []
+  # Add entries to /etc/hosts
+  # https://kubernetes.io/docs/tasks/network/customize-hosts-file-for-pods/
+  #  - ip: "127.0.0.1"
+  #    hostnames:
+  #      - "localhost"
+  #      - "ejbca"
+  hostAliases: []
+
+# Only one of the following services can be enabled at a time
+services:
+  # not recommended, should only be used for debugging purpose
+  directHttp:
+    enabled: false
+    type: NodePort
+    httpPort: 30081
+    httpsPort: 30443
+  proxyAJP:
+    enabled: FALSE
+    type: ClusterIP
+    bindIP: 0.0.0.0
+    port: 8009
+    # recommended, use with nginx in pod with LoadBalancer service or ingress
+  proxyHttp:
+    enabled: true
+    ## annotations to be added to the service
+    # annotations:
+    #   key1: value1
+    #   key2: value2
+    type: ClusterIP
+    bindIP: 0.0.0.0
+    httpPort: 8081
+    httpsPort: 8082
+
+  # Extra sidecar ports to be added to the service, optionally used when sidecarContainers
+  # are defined and need to expose ports
+  sidecarPorts: []
+
+# Requires services.proxyHttp to be enabled
+nginx:
+  enabled: false
+  # hostname used in the commonName of the TLS certificate issued for nginx
+  host: ""
+  # The hostname used to proxy from nginx to EJBCA. When nginx is in the same pod as EJBCA use localhost
+  proxy_url_host: localhost
+  # Server TLS credential for cluster internal communication
+  mountInternalNginxCert: false
+  # Name of the secret that contains the certificate, key, and CA certificate
+  secretInternalNginxCert: "internal-nginx-credential-secret-ca"
+  service:
+    enabled: false
+    type: NodePort
+    httpPort: 30080
+    httpsPort: 30443
+ 
+# Requires proxyAJP or proxyHttp service to be enabled for adminweb access
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations:
+    ## Do not redirect HTTP to HTTPS
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    ## Enable optional client certificate authentication
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "optional_no_ca"
+    ## Secret containing trusted CA certificates. Use with auth-tls-verify-client: "on" or "optional"
+    #nginx.ingress.kubernetes.io/auth-tls-secret: "default/managementca-secret"
+    ## Pass client certificates to upstream server
+    nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+    ## Verification depth of the client certificates chain
+    #nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+    ## Configure sticky sessions if using more than one replica
+    #nginx.ingress.kubernetes.io/affinity: "cookie"
+    #nginx.ingress.kubernetes.io/session-cookie-name: "ejbcaCOOKIE"
+    #nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+  hosts: []
+    #- host: ""
+    #  paths:
+    #    - path: /ejbca
+    #      pathType: Prefix
+  tls: []
+
+ingressIcp:
+  name: icp-test-env-ing 
+  class: alb
+  annotations:
+    acmCertificateArn: ''
+    listenPorts: '[{"HTTPS":443}]'
+    sslRedirect: "443"
+    loadBalancerAttributes: 'routing.http.drop_invalid_header_fields.enabled=true'
+    scheme: internal
+    targetType: ip
+    backendProtocol: HTTP
+    subnetAllowList: ''
+    healthcheckPort: "status-port"
+    healthcheckProtocol: HTTP
+  tlsEnabled: true
+  tlsSecretName: icp-test-env-tls
+  host: icp-test-node2.asea.cqen.ca
+  path: "/"
+  pathType: Prefix
+  serviceName: icp-test-env-svc
+  servicePort: 8081
+  servicePortName: icp-test-env-port
+
+replicaCount: 3
+
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+updateStrategy: {}
+#  type: RollingUpdate
+#  rollingUpdate: {}
+
+image:
+  repository: keyfactor/ejbca-ce
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion
+  tag: "9.3.3"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podLabels: {}
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+
+# https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+  behavior: {}
+  # scaleDown:
+  #   stabilizationWindowSeconds: 300
+  #   policies:
+  #   - type: Percent
+  #     value: 100
+  #     periodSeconds: 15
+  # scaleUp:
+  #   stabilizationWindowSeconds: 0
+  #   policies:
+  #   - type: Percent
+  #     value: 100
+  #     periodSeconds: 15
+  #   - type: Pods
+  #     value: 4
+  #     periodSeconds: 15
+  #   selectPolicy: Max
+
+# https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+podDisruptionBudget:
+  create: false
+  minAvailable: 1
+  maxUnavailable: ""
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+nodeSelector: {}
+affinity: {}
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+tolerations: []
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+topologySpreadConstraints: []
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
+priorityClassName: ""
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/
+schedulerName: ""
+
+# https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+terminationGracePeriodSeconds: ""
