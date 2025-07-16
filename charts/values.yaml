@@ -4,7 +4,7 @@
 
 ejbca:
   ## only applicable for quick setup of ephemeral test environments
-  useEphemeralH2Database: false
+  useEphemeralH2Database: true
   useH2Persistence: false
   #existingH2PersistenceClaim: "database-data-claim"
 
@@ -62,9 +62,9 @@ ejbca:
     SMTP_USERNAME: ejbca-mail
 
     # Configuration pour connection à la base de données
-    DATABASE_JDBC_URL: {{ .Values.database.database_jdbc_url | quote }}
-    DATABASE_USER: {{ .Values.database.database_user | quote }}
-    DATABASE_PASSWORD: {{ .Values.database.database_password | quote }}
+    #DATABASE_JDBC_URL: {{ .Values.database.database_jdbc_url | quote }}
+    #DATABASE_USER: {{ .Values.database.database_user | quote }}
+    #DATABASE_PASSWORD: {{ .Values.database.database_password | quote }}
 
   #envRaw:
   #  - name: DATABASE_USER
