@@ -3,7 +3,6 @@
 ################################################################################
 
 resource "kubernetes_manifest" "icp_app_of_apps" {
-  #for_each = toset(var.stages)
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
@@ -18,13 +17,13 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
     spec = {
       project = "${terraform.workspace}"
       source = {
-        repoURL        = var.repo_github_url_icp
-        targetRevision = var.target_revision_icp
-        path           = var.chart_path_icp
+        repoURL        = var.repo_github_url
+        targetRevision = var.target_revision
+        path           = var.chart_path
         helm = {
           values = yamlencode({
-            server_image_icp   = var.server_image_icp
-            server_tag_icp     = var.image_tag_icp
+            server_image   = var.server_image
+            server_tag_icp     = var.image_tag
             ingressIcp = {
               annotations = {
                 subnetAllowList   = "${module.sea_network.web_subnet_a.id}, ${module.sea_network.web_subnet_b.id}"

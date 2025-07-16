@@ -46,83 +46,27 @@ variable "acm_certificate_arn" {
   type        = string
 }
 
-/*
-variable "repo_github_ifra_url" {
-  description = "The URL of the repository"
-  type        = string
-}
-
-variable "repo_github_ifra_target_revision" {
-  description = "The target revision of the repository"
-  type        = string
-}
-
-variable "github_app_id" {
-  description = "GitHub App ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "github_app_installation_id" {
-  description = "GitHub App Installation ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "github_app_private_key" {
-  description = "GitHub App Private Key"
-  type        = string
-  sensitive   = true
-} */
-
-variable "repo_github_url_icp" {
+variable "repo_github_url" {
   description = "The URL of the repository de l'ICP EJBCA"
   type        = string
 }
 
-variable "target_revision_icp" {
+variable "target_revision" {
   description = "The target revision of the repository ICP EJBCA"
   type        = string
 }
 
-variable "chart_path_icp" {
+variable "chart_path" {
   description = "Le chemin vers le repertoire du helm chart de l'icp dans le repo"
   type        = string
 }
 
-variable "server_image_icp" {
+variable "server_image" {
   description = "valeur du nom de l'image de l'icp EJBCA"
   type        = string
 }
 
-variable "image_tag_icp" {
+variable "image_tag" {
   description = "le tag de l'image de l'icp EJBCA"
   type        = string
 } 
-
-/* variable "repo_github_url" {
-  description = "The URL of the repository"
-  type        = string
-}
-
-variable "target_revision" {
-  description = "The target revision of the repository"
-  type        = string
-}*/
-
-/*
-variable "chart_path_test_argocd" {
-  description = "The path to the chart in the repository for the app de test argo cd"
-  type        = string
-}
-
-variable "server_image_test_argo" {
-  description = "value of the image repo for the sapp de test argo cd"
-  type        = string
-}
-
-variable "image_tag_test_argo" {
-  description = "value of the image tag for the app de test argo cd"
-  type        = string
-}
-*/ 
