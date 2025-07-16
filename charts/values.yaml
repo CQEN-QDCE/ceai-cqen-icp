@@ -216,7 +216,7 @@ image:
   repository: keyfactor/ejbca-ce
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion
-  tag: "9.3.3"
+  tag: "9.1.1"
 
 imagePullSecrets: []
 nameOverride: ""
