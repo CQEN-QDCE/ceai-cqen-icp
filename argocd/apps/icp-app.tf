@@ -7,7 +7,7 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
     metadata = {
-      name      = "icp-${terraform.workspace}"
+      name      = "icp-ejbca-${terraform.workspace}"
       namespace = "argocd"
       labels = {
         "app.kubernetes.io/name"    = "icp-ejbca-${terraform.workspace}"
