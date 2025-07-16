@@ -62,9 +62,13 @@ ejbca:
     SMTP_USERNAME: ejbca-mail
 
     # Configuration pour connection à la base de données
-    DATABASE_JDBC_URL: {{ .Values.database.database_jdbc_url | quote }}
-    DATABASE_USER: {{ .Values.database.database_user | quote }}
-    DATABASE_PASSWORD: {{ .Values.database.database_password | quote }}
+    #DATABASE_JDBC_URL: {{ .Values.database.database_jdbc_url | quote }}
+    #DATABASE_USER: {{ .Values.database.database_user | quote }}
+    #DATABASE_PASSWORD: {{ .Values.database.database_password | quote }}
+
+    DATABASE_JDBC_URL: '' 
+    DATABASE_USER: ''
+    DATABASE_PASSWORD: ''
 
 
   #envRaw:
