@@ -62,13 +62,9 @@ ejbca:
     SMTP_USERNAME: ejbca-mail
 
     # Configuration pour connection à la base de données
-    #DATABASE_JDBC_URL: {{ .Values.database.database_jdbc_url | quote }}
-    #DATABASE_USER: {{ .Values.database.database_user | quote }}
-    #DATABASE_PASSWORD: {{ .Values.database.database_password | quote }}
-
-    DATABASE_JDBC_URL: "jdbc:postgresql://xroad-aurora-postgresql-rds-cluster.cluster-ctw6com8agys.ca-central-1.rds.amazonaws.com:5432/ejbca"
-    DATABASE_USER: "RAMUNDAO"
-    DATABASE_PASSWORD: "ISAWYOUSATHATYOUSAYTHATYOUSAW" 
+    DATABASE_JDBC_URL: {{ .Values.database.database_jdbc_url | quote }}
+    DATABASE_USER: {{ .Values.database.database_user | quote }}
+    DATABASE_PASSWORD: {{ .Values.database.database_password | quote }}
 
 
   #envRaw:
