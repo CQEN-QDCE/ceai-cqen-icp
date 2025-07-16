@@ -29,11 +29,11 @@ variable "assume_role_arn" {
   default     = null
 }
 
-/*variable "workload_account_type" {
+variable "workload_account_type" {
   type        = string
   description = "The type of workload account LZA to create"
   default     = "Dev"
-}*/
+}
 
 variable "environment" {
   type        = string
