@@ -51,10 +51,10 @@ variable "repo_github_ifra_url" {
   type        = string
 }
 
-variable "repo_github_ifra_target_revision" {
+/*variable "repo_github_ifra_target_revision" {
   description = "The target revision of the repository"
   type        = string
-}
+}*/
 
 variable "github_app_id" {
   description = "GitHub App ID"
@@ -104,11 +104,12 @@ variable "repo_github_url" {
   type        = string
 }
 
-variable "target_revision" {
+/*variable "target_revision" {
   description = "The target revision of the repository"
   type        = string
-}
+}*/
 
+/*
 variable "chart_path_test_argocd" {
   description = "The path to the chart in the repository for the app de test argo cd"
   type        = string
@@ -123,4 +124,4 @@ variable "image_tag_test_argo" {
   description = "value of the image tag for the app de test argo cd"
   type        = string
 }
-
+*/ 
