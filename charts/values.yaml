@@ -4,7 +4,7 @@
 
 ejbca:
   ## only applicable for quick setup of ephemeral test environments
-  useEphemeralH2Database: true
+  useEphemeralH2Database: false
   useH2Persistence: false
   #existingH2PersistenceClaim: "database-data-claim"
 
