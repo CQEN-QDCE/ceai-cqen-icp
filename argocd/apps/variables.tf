@@ -70,3 +70,21 @@ variable "image_tag" {
   description = "le tag de l'image de l'icp EJBCA"
   type        = string
 } 
+
+variable "DATABASE_JDBC_URL" {
+  description = "JDBC URL for the database"
+  type        = string
+  sensitive = true
+}
+
+variable "DATABASE_USER" {
+  description = "Database user for the ICP EJBCA"
+  type        = string
+  sensitive = true
+}
+
+variable "DATABASE_PASSWORD" {
+  description = "Database password for the ICP EJBCA"
+  type        = string
+  sensitive   = true
+}

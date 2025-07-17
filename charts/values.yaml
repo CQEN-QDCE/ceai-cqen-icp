@@ -4,7 +4,7 @@
 
 ejbca:
   ## only applicable for quick setup of ephemeral test environments
-  useEphemeralH2Database: true
+  useEphemeralH2Database: false
   useH2Persistence: false
   #existingH2PersistenceClaim: "database-data-claim"
 
@@ -26,9 +26,9 @@ ejbca:
   #superadminPasswordOverride: ""
   env:
     # for ephemeral test environments and only applicable to CA node
-    TLS_SETUP_ENABLED: "true"
+    # TLS_SETUP_ENABLED: "true"
     # External RA, VA, or when you want to bootstrap a CA/superadmin credential to use
-    # TLS_SETUP_ENABLED: "later"
+    TLS_SETUP_ENABLED: "later"
 
     # database username and password are recommended to be input as secret
     # DATABASE_JDBC_URL: ""
@@ -61,17 +61,13 @@ ejbca:
     # The username used when authentication is required for SMTP server.
     SMTP_USERNAME: ejbca-mail
 
+    # Configuration pour connection à la base de données
+    DATABASE_JDBC_URL: '' 
+    DATABASE_USER: ''
+    DATABASE_PASSWORD: ''
+
+
   #envRaw:
-  #  - name: DATABASE_USER
-  #    valueFrom:
-  #     secretKeyRef:
-  #       name: ejbcadbcredentials
-  #       key: database_user
-  #  - name: DATABASE_PASSWORD
-  #    valueFrom:
-  #     secretKeyRef:
-  #       name: ejbcadbcredentials
-  #       key: database_password
   #  - name: PASSWORD_ENCRYPTION_KEY
   #    valueFrom:
   #     secretKeyRef:
