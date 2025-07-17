@@ -30,7 +30,7 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
                 acmCertificateArn = var.acm_certificate_arn
               }
             }
-            database = {
+            env = {
               DATABASE_JDBC_URL = var.DATABASE_JDBC_URL
               DATABASE_USER     = var.DATABASE_USER
               DATABASE_PASSWORD = var.DATABASE_PASSWORD
