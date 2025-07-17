@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingressIcp.name }}
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingressIcp.annotations.acmCertificateArn | quote }}
+    alb.ingress.kubernetes.io/listen-ports: {{ .Values.ingressIcp.annotations.listenPorts | quote }}
+    alb.ingress.kubernetes.io/ssl-redirect: {{ .Values.ingressIcp.annotations.sslRedirect | quote }}
+    alb.ingress.kubernetes.io/load-balancer-attributes: {{ .Values.ingressIcp.annotations.loadBalancerAttributes | quote }}
+    alb.ingress.kubernetes.io/scheme: {{ .Values.ingressIcp.annotations.scheme | quote }}
+    alb.ingress.kubernetes.io/target-type: {{ .Values.ingressIcp.annotations.targetType | quote }}
+    alb.ingress.kubernetes.io/backend-protocol: {{ .Values.ingressIcp.annotations.backendProtocol | quote }}
+    alb.ingress.kubernetes.io/subnets: {{ .Values.ingressIcp.annotations.subnetAllowList | quote }}
+    alb.ingress.kubernetes.io/success-codes: 200-302
+  labels: 
+    argocd.argoproj.io/instance: icp_app_of_apps
+spec:
+  ingressClassName: {{ .Values.ingressIcp.class }}
+  rules:
+    - http:
+        paths:
+          - path: {{ .Values.ingressIcp.path }}
+            pathType: {{ .Values.ingressIcp.pathType }}
+            backend:
+              service:
+                name: {{ include "ejbca.fullname" . }} 
+                port:
+                  number: {{ .Values.ingressIcp.servicePort }}
