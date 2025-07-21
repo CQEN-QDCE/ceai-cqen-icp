@@ -203,6 +203,8 @@ ingressIcp:
 
 replicaCount: 3
 
+torjc01: "Julio Cesar Torres dos Santos"
+
 # https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 updateStrategy: {}
 #  type: RollingUpdate
