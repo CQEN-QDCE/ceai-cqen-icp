@@ -179,7 +179,7 @@ ingress:
   tls: []
 
 ingressIcp:
-  name: icp-test-env-ing 
+  name: ingress-icp-alb
   class: alb
   annotations:
     acmCertificateArn: ''
