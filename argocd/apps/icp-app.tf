@@ -55,7 +55,7 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
       }
     }
   }
-  /* depends_on = [
+  depends_on = [
     kubernetes_manifest.argocd_project
-  ] */
+  ]
 }
