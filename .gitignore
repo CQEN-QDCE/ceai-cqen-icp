@@ -153,3 +153,7 @@ _tmp/
 *.pkcs12
 *.p12
 *.pem
+
+# Fichiers d'environnement
+.env
+*.env
