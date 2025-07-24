@@ -1,0 +1,271 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: ejbca-template
+  annotations:
+    description: "Template pour déployer EJBCA CE avec MariaDB sur OpenShift"
+    tags: "ejbca,mariadb,database"
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ejbca-database-secret
+  type: Opaque
+  stringData:
+    database-name: ${MYSQL_DATABASE}
+    database-root-password: ${MYSQL_ROOT_PASSWORD}
+    database-user: ${MYSQL_USER}
+    database-password: ${MYSQL_PASSWORD}
+
+# PersistentVolumeClaim pour la base de données
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: ejbca-database-pvc
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${DATABASE_STORAGE_SIZE}
+
+# Service pour la base de données MariaDB
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ejbca-database-node1
+    labels:
+      app: ejbca-database-node1
+      app.kubernetes.io/part-of: ${APP_GROUP}
+  spec:
+    ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+    selector:
+      app: ejbca-database
+
+# Déploiement de la base de données MariaDB
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: ejbca-database-node1
+    labels:
+      app: ejbca-database-node1
+      app.kubernetes.io/part-of: ${APP_GROUP}
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: ejbca-database
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: ejbca-database
+      spec:
+        containers:
+        - name: mariadb
+          image: library/mariadb:lts-noble
+          ports:
+          - containerPort: 3306
+            name: mysql
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ejbca-database-secret
+                key: database-root-password
+          - name: MYSQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: ejbca-database-secret
+                key: database-name
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: ejbca-database-secret
+                key: database-user
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ejbca-database-secret
+                key: database-password
+          volumeMounts:
+          - name: mariadb-data
+            mountPath: /var/lib/mysql
+          resources:
+            limits:
+              memory: ${DATABASE_MEMORY_LIMIT}
+              cpu: ${DATABASE_CPU_LIMIT}
+            requests:
+              memory: ${DATABASE_MEMORY_REQUEST}
+              cpu: ${DATABASE_CPU_REQUEST}
+        volumes:
+        - name: mariadb-data
+          persistentVolumeClaim:
+            claimName: ejbca-database-pvc
+
+# Service pour EJBCA pour les ports HTTP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ejbca-node1-http
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    selector:
+      app: ejbca
+
+# Service pour EJBCA pour les ports HTTPS
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ejbca-node1-https
+  spec:
+    ports:
+    - name: https
+      port: 8443
+      targetPort: 8443
+    selector:
+      app: ejbca
+
+# Déploiement d'EJBCA
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: ejbca-node1
+    labels:
+      app: ejbca-node1
+      app.kubernetes.io/part-of: ${APP_GROUP}
+      app.openshift.io/connects-to: ejbca-database-node1
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: ejbca
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: ejbca
+      spec:
+        containers:
+        - name: ejbca
+          image: keyfactor/ejbca-ce:9.1.1
+          ports:
+          - containerPort: 8080
+            name: http
+          - containerPort: 8443
+            name: https
+          env:
+          - name: DATABASE_JDBC_URL
+            value: ${DATABASE_JDBC_URL}
+          - name: LOG_LEVEL_APP
+            value: ${LOG_LEVEL_APP}
+          - name: LOG_LEVEL_SERVER
+            value: ${LOG_LEVEL_SERVER}
+          - name: TLS_SETUP_ENABLED
+            value: ${TLS_SETUP_ENABLED}
+          - name: LD_BIND_NOW
+            value: ${LD_BIND_NOW}
+          resources:
+            limits:
+              memory: ${EJBCA_MEMORY_LIMIT}
+              cpu: ${EJBCA_CPU_LIMIT}
+            requests:
+              memory: ${EJBCA_MEMORY_REQUEST}
+              cpu: ${EJBCA_CPU_REQUEST}
+
+# Route pour accéder à EJBCA via HTTPS
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    name: ejbca-https
+  spec:
+    host: ${APP_SUBDOMAIN}.${APP_DOMAIN}
+    port:
+      targetPort: https
+    tls:
+      termination: passthrough
+    to:
+      kind: Service
+      name: ejbca-node1-https
+
+parameters:
+- name: MYSQL_ROOT_PASSWORD
+  description: Mot de passe root pour la base de données
+  required: true
+- name: MYSQL_DATABASE
+  description: Nom de la base de données
+  required: true
+- name: MYSQL_USER
+  description: Nom d'utilisateur pour la base de données
+  required: true
+- name: MYSQL_PASSWORD
+  description: Mot de passe pour l'utilisateur de la base de données
+  required: true
+- name: DATABASE_JDBC_URL
+  description: URL JDBC pour la base de données
+  required: true
+- name: DATABASE_STORAGE_SIZE
+  description: Taille du volume persistant pour la base de données
+  value: 5Gi
+- name: DATABASE_MEMORY_LIMIT
+  description: Limite de mémoire pour la base de données
+  value: 1Gi
+- name: DATABASE_CPU_LIMIT
+  description: Limite de CPU pour la base de données
+  value: "1"
+- name: DATABASE_MEMORY_REQUEST
+  description: Mémoire demandée pour la base de données
+  value: 512Mi
+- name: DATABASE_CPU_REQUEST 
+  description: CPU demandé pour la base de données
+  value: "0.5"
+- name: EJBCA_MEMORY_LIMIT
+  description: Limite de mémoire pour EJBCA
+  value: 2Gi
+- name: EJBCA_CPU_LIMIT
+  description: Limite de CPU pour EJBCA
+  value: "2"
+- name: EJBCA_MEMORY_REQUEST
+  description: Mémoire demandée pour EJBCA
+  value: 1Gi
+- name: EJBCA_CPU_REQUEST
+  description: CPU demandé pour EJBCA
+  value: "1"
+- name: APP_GROUP 
+  description: Groupe d'application pour l'étiquetage
+  value: ejbca
+  required: true
+- name: APP_SUBDOMAIN
+  description: Sous-domaine pour l'application (par exemple 'ejbca')
+  required: true
+- name: APP_DOMAIN
+  description: Domaine principal pour l'application (par exemple 'example.com')
+  required: true
+- name: LOG_LEVEL_APP
+  description: Niveau de journalisation pour l'application
+  value: INFO
+  required: true
+- name: LOG_LEVEL_SERVER
+  description: Niveau de journalisation pour le serveur
+  value: INFO
+  required: true
+- name: TLS_SETUP_ENABLED
+  description: Configuration TLS activée
+  value: simple
+  required: true
+- name: LD_BIND_NOW 
+  description: Activer LD_BIND_NOW
+  value: "1"
+  required: true
+- name: APP_NAME  
+  description: Nom de l'application pour l'étiquetage
+  value: ejbca
+  required: true

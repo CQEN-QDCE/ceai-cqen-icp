@@ -1,0 +1,182 @@
+######################################################################
+# Template Openshift deployement de la solution SignServer TSA 
+# pour l'ICP d'X-Road.
+#  
+# Pour déployer cette solution, exécuter la commande suivante:
+# oc process -f signserver.yaml --param-file=signserver.params.env | oc apply -f -
+######################################################################
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: ${APP_NAME}
+  annotations:
+    description: Site Web qui permet la création d'une demande de generation de certificat numérique pour l'ICP d'X-Road. 
+    tags: cqen, experimentation, x-road, icp, pki
+objects:
+
+#######################################################################
+# Service Account pour l'application SignServer
+#######################################################################
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: sserver-${APP_NAME}
+    labels:
+      helm.sh/chart: ${APP_NAME}-1.0.1
+      app.kubernetes.io/name: ${APP_NAME}
+      app.kubernetes.io/instance: sserver
+      app.kubernetes.io/version: "6.0.0.1"
+      app.kubernetes.io/managed-by: Helm
+
+ ########################################################################
+ # ServiceAccount pour l'application SignServer
+ ########################################################################     
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: sserver-${APP_NAME}
+    labels:
+      helm.sh/chart: ${APP_NAME}-1.0.1
+      app.kubernetes.io/name: ${APP_NAME}
+      app.kubernetes.io/instance: sserver
+      app.kubernetes.io/version: "6.0.0.1"
+      app.kubernetes.io/managed-by: Helm
+  spec:
+    type: NodePort
+    ports:
+      - port: 32089
+        nodePort: 32089
+        targetPort: http
+        protocol: TCP
+        name: http
+      - port: 32449
+        nodePort: 32449
+        targetPort: https
+        protocol: TCP
+        name: https
+    selector:
+      app.kubernetes.io/name: ${APP_NAME}
+      app.kubernetes.io/instance: sserver
+
+#######################################################################
+# Deployment pour l'application SignServer
+#######################################################################
+- kind: Deployment
+  apiVersion: apps/v1
+  metadata:
+    name: sserver-${APP_NAME}
+    labels:
+      helm.sh/chart: ${APP_NAME}-1.0.1
+      app.kubernetes.io/name: ${APP_NAME}
+      app.kubernetes.io/instance: sserver
+      app.kubernetes.io/version: "6.0.0.1"
+      app.kubernetes.io/managed-by: Helm
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: ${APP_NAME}
+        app.kubernetes.io/instance: sserver
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: ${APP_NAME}
+          app.kubernetes.io/instance: sserver
+      spec:
+        serviceAccountName: sserver-${APP_NAME}
+        securityContext:
+          {}
+        containers:
+          - name: ${APP_NAME}
+            securityContext:
+              {}
+            image: "keyfactor/signserver-ce:6.0.0.1"
+            imagePullPolicy: IfNotPresent
+            env:
+              
+              - name: DATABASE_JDBC_URL
+                value: "jdbc:h2:mem:signserverdb;DB_CLOSE_DELAY=-1"
+            lifecycle:
+              postStart:
+                exec:
+                  command: 
+                    - "/bin/sh"
+                    - "-c"
+                    - |
+            ports:
+              - name: http
+                containerPort: 8080
+                protocol: TCP
+              - name: https
+                containerPort: 8443
+                protocol: TCP
+            startupProbe:
+              tcpSocket:
+                port: 8443
+              initialDelaySeconds: 10
+              periodSeconds: 2
+              failureThreshold: 500
+            livenessProbe:
+              tcpSocket:
+                port: 8443
+            resources:
+              {}
+            volumeMounts:
+            - name: cert-volume
+              mountPath: /mnt/external/secrets/tls/cas
+              readOnly: true
+        volumes:
+        - name: cert-volume
+          secret:
+            secretName: management-ca-secret
+
+
+######################################################################
+# Routes
+######################################################################
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: ${APP_NAME}
+    labels:
+      app: ${APP_NAME}
+      app.kubernetes.io/part-of: ${APP_GROUP}
+  spec:
+    host: ${APP_NAME}.${APP_DOMAIN}
+    to:
+      kind: Service
+      name: sserver-${APP_NAME}
+      weight: 100
+    port:
+      targetPort: 8080
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: None
+    wildcardPolicy: None
+  status:
+    ingress:
+      - host: ${APP_NAME}.${APP_DOMAIN}
+        routerName: default
+        conditions:
+          - type: Admitted
+            status: "True"
+        wildcardPolicy: None
+        routerCanonicalHostname: ${APP_DOMAIN}
+
+######################################################################
+# Parameters
+######################################################################
+parameters:
+- name: APP_GROUP
+  displayName: App Group
+  description: Used to group components together.
+  required: true
+  value: 'Trust-Services'
+- name: APP_NAME
+  displayName: Application name
+  description: Used to group components together in the OpenShift console.
+  required: true
+- name: APP_DOMAIN
+  displayName: App domain
+  description: App domain
+  VALUE: "apps.exp.openshift.cqen.ca"
