@@ -17,7 +17,7 @@ delete:
 # Installation de EJBCA
 deployEJBCA: 
 	@echo "Deploiement EJBCA..."
-	oc process -f openshift/templates/ejbca.yaml --param-file=openshift/templates/ejbca.env.params | oc apply -f -
+	oc process -f openshift/templates/ejbca.yaml --param-file=openshift/templates/ejbca.params.env | oc apply -f -
 
 dryRunEJBCA: 
 	@echo "Teste du deploiement EJBCA (dry run)..."
