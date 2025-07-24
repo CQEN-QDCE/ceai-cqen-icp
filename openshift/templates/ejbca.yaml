@@ -1,3 +1,16 @@
+###############################################################################
+# Template pour déployer EJBCA CE avec MariaDB sur OpenShift
+###############################################################################
+# Ce template permet de déployer EJBCA CE avec une base de données MariaDB
+# sur OpenShift. Il inclut les configurations nécessaires pour la base de données,
+# le déploiement d'EJBCA, ainsi que les services et routes pour l'accès
+# à l'application.  
+# Les paramètres de configuration sont définis pour permettre une personnalisation
+# facile lors du déploiement.
+## Pour déployer cette solution, exécuter la commande suivante:
+# oc process -f ejbca.yaml --param-file=ejbca.params.env | oc apply -f -
+###############################################################################
+kind: Template
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
@@ -6,6 +19,10 @@ metadata:
     description: "Template pour déployer EJBCA CE avec MariaDB sur OpenShift"
     tags: "ejbca,mariadb,database"
 objects:
+
+##########################################################################
+# Secrèts pour la BD de l'application EJBCA
+##########################################################################
 - apiVersion: v1
   kind: Secret
   metadata:
@@ -17,7 +34,10 @@ objects:
     database-user: ${MYSQL_USER}
     database-password: ${MYSQL_PASSWORD}
 
+
+##########################################################################
 # PersistentVolumeClaim pour la base de données
+##########################################################################
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
@@ -29,13 +49,16 @@ objects:
       requests:
         storage: ${DATABASE_STORAGE_SIZE}
 
+
+##########################################################################
 # Service pour la base de données MariaDB
+###########################################################################
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ejbca-database-node1
+    name: ejbca-database-${INSTANCE}
     labels:
-      app: ejbca-database-node1
+      app: ejbca-database-${INSTANCE}
       app.kubernetes.io/part-of: ${APP_GROUP}
   spec:
     ports:
@@ -45,13 +68,16 @@ objects:
     selector:
       app: ejbca-database
 
+
+##########################################################################
 # Déploiement de la base de données MariaDB
+##########################################################################
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
-    name: ejbca-database-node1
+    name: ejbca-database-${INSTANCE}
     labels:
-      app: ejbca-database-node1
+      app: ejbca-database-${INSTANCE}
       app.kubernetes.io/part-of: ${APP_GROUP}
   spec:
     replicas: 1
@@ -107,11 +133,14 @@ objects:
           persistentVolumeClaim:
             claimName: ejbca-database-pvc
 
+
+##########################################################################
 # Service pour EJBCA pour les ports HTTP
+##########################################################################
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ejbca-node1-http
+    name: ejbca-${INSTANCE}-http
   spec:
     ports:
     - name: http
@@ -120,11 +149,14 @@ objects:
     selector:
       app: ejbca
 
+
+##########################################################################
 # Service pour EJBCA pour les ports HTTPS
+##########################################################################
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ejbca-node1-https
+    name: ejbca-${INSTANCE}-https
   spec:
     ports:
     - name: https
@@ -133,15 +165,18 @@ objects:
     selector:
       app: ejbca
 
+
+##########################################################################
 # Déploiement d'EJBCA
+##########################################################################
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
-    name: ejbca-node1
+    name: ejbca-${INSTANCE}
     labels:
-      app: ejbca-node1
+      app: ejbca-${INSTANCE}
       app.kubernetes.io/part-of: ${APP_GROUP}
-      app.openshift.io/connects-to: ejbca-database-node1
+      app.openshift.io/connects-to: ejbca-database-${INSTANCE}
   spec:
     replicas: 1
     selector:
@@ -171,8 +206,7 @@ objects:
             value: ${LOG_LEVEL_SERVER}
           - name: TLS_SETUP_ENABLED
             value: ${TLS_SETUP_ENABLED}
-          - name: LD_BIND_NOW
-            value: ${LD_BIND_NOW}
+
           resources:
             limits:
               memory: ${EJBCA_MEMORY_LIMIT}
@@ -181,7 +215,10 @@ objects:
               memory: ${EJBCA_MEMORY_REQUEST}
               cpu: ${EJBCA_CPU_REQUEST}
 
+
+###########################################################################
 # Route pour accéder à EJBCA via HTTPS
+###########################################################################
 - apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
@@ -194,8 +231,12 @@ objects:
       termination: passthrough
     to:
       kind: Service
-      name: ejbca-node1-https
+      name: ejbca-${INSTANCE}-https
 
+
+############################################################################
+# Paramètres de configuration pour l'application EJBCA
+############################################################################
 parameters:
 - name: MYSQL_ROOT_PASSWORD
   description: Mot de passe root pour la base de données
@@ -269,3 +310,8 @@ parameters:
   description: Nom de l'application pour l'étiquetage
   value: ejbca
   required: true
+- name: INSTANCE
+  description: Instance de l'application (par exemple 'ejbca1')
+  value: ejbca1
+  required: true
+
