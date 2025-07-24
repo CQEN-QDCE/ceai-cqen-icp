@@ -138,3 +138,18 @@ _tmp/
 *.gzip
 *.xz
 *.lzma
+
+# Certificates and keys
+*.crt
+*.key
+*.csr
+*.pfx
+*.p12
+*.jks
+*.p7b
+*.p7s
+*.der
+*.jceks
+*.pkcs12
+*.p12
+*.pem
