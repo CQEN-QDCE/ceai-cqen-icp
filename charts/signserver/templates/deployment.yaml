@@ -1,0 +1,172 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "signserver-community-helm.fullname" . }}
+  labels:
+    {{- include "signserver-community-helm.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "signserver-community-helm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "signserver-community-helm.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "signserver-community-helm.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}  
+      {{- if .Values.signserver.initContainers }}
+      initContainers:
+        {{- toYaml .Values.signserver.initContainers | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env: {{- include "signserver-community-helm.signserverDeploymentParameters" . | nindent 12 }}
+            {{- if .Values.services.proxyAJP.enabled }}
+            - name: PROXY_AJP_BIND
+              value: {{ .Values.services.proxyAJP.bindIP }}
+            {{- end }}
+            {{- if .Values.services.proxyHttp.enabled }}
+            - name: PROXY_HTTP_BIND
+              value: {{ .Values.services.proxyHttp.bindIP }}
+            {{- end }}
+          lifecycle:
+            postStart:
+              exec:
+                command: 
+                  - "/bin/sh"
+                  - "-c"
+                  - |
+                    {{- if .Values.signserver.importWorkerProperties }}
+                    until [ -f /opt/keyfactor/appserver/standalone/deployments/signserver.ear.deployed ]; do sleep 5; done
+                    for FILE in /opt/keyfactor/tmp/workers/*; do /opt/keyfactor/bin/signserver setproperties "$FILE"; done
+                    {{- end }}
+          ports:
+            {{- if .Values.services.directHttp.enabled }}
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.services.proxyAJP.enabled }}
+            - name: ajp
+              containerPort: 8009
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.services.proxyHttp.enabled }}
+            - name: proxy-http
+              containerPort: 8081
+              protocol: TCP
+            - name: proxy-https
+              containerPort: 8082
+              protocol: TCP
+            {{- end }}
+          startupProbe:
+            tcpSocket:
+              {{- if .Values.services.directHttp.enabled }}
+              port: 8443
+              {{- else if .Values.services.proxyAJP.enabled }}
+              port: 8009
+              {{- else if .Values.services.proxyHttp.enabled }}
+              port: 8082
+              {{- end }}
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            failureThreshold: 500
+          livenessProbe:
+            tcpSocket:
+              {{- if .Values.services.directHttp.enabled }}
+              port: 8443
+              {{- else if .Values.services.proxyAJP.enabled }}
+              port: 8009
+              {{- else if .Values.services.proxyHttp.enabled }}
+              port: 8082
+              {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.signserver.useH2Persistence }}
+            - name: signserver-h2-persistence
+              mountPath: /mnt/persistent/
+            {{- end }}
+            {{- if .Values.signserver.importAppserverKeystore }}
+            - name: signserver-config-appserver-keystore
+              mountPath: /mnt/external/secrets/tls/ks/
+            {{- end }}
+            {{- if .Values.signserver.importAppserverTruststore }}
+            - name: signserver-config-appserver-truststore
+              mountPath: /mnt/external/secrets/tls/ts/
+            {{- end }}
+            {{- if .Values.signserver.importWorkerProperties }}
+            - name: signserver-workers-properties-files
+              mountPath: /opt/keyfactor/tmp/workers/
+            {{- end }}
+            {{- if .Values.signserver.importKeystores }}
+            - name: signserver-keystores-files
+              mountPath: {{ .Values.signserver.keystoresMountPath }}
+            {{- end }}
+            {{- if .Values.signserver.volumeMounts }}
+              {{- toYaml .Values.signserver.volumeMounts | nindent 12 }}
+            {{- end }}
+          {{- if .Values.signserver.sidecarContainers }}
+            {{- toYaml .Values.signserver.sidecarContainers | nindent 8 }}
+          {{- end }}
+      volumes:
+        {{- if .Values.signserver.useH2Persistence }}
+        - name: signserver-h2-persistence
+          persistentVolumeClaim:
+            claimName: {{ .Values.signserver.existingH2PersistenceClaim }}
+        {{- end }}
+        {{- if .Values.signserver.importAppserverKeystore }}
+        - name: signserver-config-appserver-keystore
+          secret:
+            secretName: {{ .Values.signserver.appserverKeystoreSecret }}
+        {{- end }}
+        {{- if .Values.signserver.importAppserverTruststore }}
+        - name: signserver-config-appserver-truststore
+          secret:
+            secretName: {{ .Values.signserver.appserverTruststoreSecret }}
+        {{- end }}
+        {{- if .Values.signserver.importWorkerProperties }}
+        - name: signserver-workers-properties-files
+          secret:
+            secretName: {{ .Values.signserver.workerPropertiesSecret }}
+        {{- end }}
+        {{- if .Values.signserver.importKeystores }}
+        - name: signserver-keystores-files
+          secret:
+            secretName: {{ .Values.signserver.keystoresSecret }}
+        {{- end }}
+        {{- if .Values.signserver.volumes }}
+          {{- toYaml .Values.signserver.volumes | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
