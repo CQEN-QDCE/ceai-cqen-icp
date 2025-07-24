@@ -33,7 +33,7 @@ helmEJBCA:
 
 cert: 
 	@echo "Création du secrèt Management CA..."
-	oc create secret generic management-ca-secret --from-file=ManagementCA.crt=certs/ManagementCA.pem -n services-confiance-xroad || true	
+	oc create secret generic management-ca-secret --from-file=ManagementCA.crt=certs/ManagementCA.cacert.pem -n services-confiance-xroad || true	
 
 deploySignServer: 
 	@echo "Deploiement SignServer..."
