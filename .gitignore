@@ -139,7 +139,7 @@ _tmp/
 *.xz
 *.lzma
 
-# Certificates and keys
+# Objets cryptographiques: certificats, clés, etc
 *.crt
 *.key
 *.csr
