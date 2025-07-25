@@ -10,7 +10,6 @@
 ## Pour déployer cette solution, exécuter la commande suivante:
 # oc process -f ejbca.yaml --param-file=ejbca.params.env | oc apply -f -
 ###############################################################################
-kind: Template
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
@@ -56,9 +55,9 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ejbca-database-${INSTANCE}
+    name: ejbca-database-node1
     labels:
-      app: ejbca-database-${INSTANCE}
+      app: ejbca-database-node1
       app.kubernetes.io/part-of: ${APP_GROUP}
   spec:
     ports:
@@ -75,9 +74,9 @@ objects:
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
-    name: ejbca-database-${INSTANCE}
+    name: ejbca-database-node1
     labels:
-      app: ejbca-database-${INSTANCE}
+      app: ejbca-database-node1
       app.kubernetes.io/part-of: ${APP_GROUP}
   spec:
     replicas: 1
@@ -140,7 +139,7 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ejbca-${INSTANCE}-http
+    name: ejbca-node1-http
   spec:
     ports:
     - name: http
@@ -156,7 +155,7 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ejbca-${INSTANCE}-https
+    name: ejbca-node1-https
   spec:
     ports:
     - name: https
@@ -172,11 +171,11 @@ objects:
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
-    name: ejbca-${INSTANCE}
+    name: ejbca-node1
     labels:
-      app: ejbca-${INSTANCE}
+      app: ejbca-node1
       app.kubernetes.io/part-of: ${APP_GROUP}
-      app.openshift.io/connects-to: ejbca-database-${INSTANCE}
+      app.openshift.io/connects-to: ejbca-database-node1
   spec:
     replicas: 1
     selector:
@@ -206,7 +205,8 @@ objects:
             value: ${LOG_LEVEL_SERVER}
           - name: TLS_SETUP_ENABLED
             value: ${TLS_SETUP_ENABLED}
-
+          - name: LD_BIND_NOW
+            value: ${LD_BIND_NOW}
           resources:
             limits:
               memory: ${EJBCA_MEMORY_LIMIT}
@@ -231,7 +231,7 @@ objects:
       termination: passthrough
     to:
       kind: Service
-      name: ejbca-${INSTANCE}-https
+      name: ejbca-node1-https
 
 
 ############################################################################
@@ -307,11 +307,6 @@ parameters:
   value: "1"
   required: true
 - name: APP_NAME  
-  description: Nom de l'application pour l'étiquetage
+  description: Nom de l'application
   value: ejbca
   required: true
-- name: INSTANCE
-  description: Instance de l'application (par exemple 'ejbca1')
-  value: ejbca1
-  required: true
-

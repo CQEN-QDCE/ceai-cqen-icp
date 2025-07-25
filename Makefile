@@ -12,6 +12,10 @@ delete:
 	oc delete all --all -n services-confiance-xroad || true
 	oc delete project services-confiance-xroad || true
 
+cleanup:
+	@echo "Suppression des objets du namespace des Services de Confiance..."
+	oc delete all --all -n services-confiance-xroad || true
+	
 @deploy: deployEJBCA @installSignServer
 
 # Installation de EJBCA
@@ -21,7 +25,7 @@ deployEJBCA:
 
 dryRunEJBCA: 
 	@echo "Teste du deploiement EJBCA (dry run)..."
-	oc process -f openshift/templates/ejbca.yaml --param-file=openshift/templates/ejbca.env.params
+	oc process -f openshift/templates/ejbca.yaml --param-file=openshift/templates/ejbca.params.env
 
 helmEJBCA:
 	helm install ejbca charts/ejbca -n services-confiance-xroad
