@@ -1,3 +1,5 @@
+{{- if .Values.ingressIcp.enabled }}
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -26,3 +28,4 @@ spec:
                 name: {{ include "ejbca.fullname" . }} 
                 port:
                   number: {{ .Values.ingressIcp.servicePort }}
+{{- end }}

@@ -6,7 +6,7 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
-    metadata = {
+      metadata = {  
       name      = "icp-ejbca-${terraform.workspace}"
       namespace = "argocd"
       labels = {
@@ -15,7 +15,7 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
       }
     }
     spec = {
-      project = "base-${terraform.workspace}"
+      project = "${terraform.workspace}"
       source = {
         repoURL        = var.repo_github_url
         targetRevision = var.target_revision
@@ -42,7 +42,7 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
       }
       destination = {
         server    = "https://kubernetes.default.svc"
-        namespace = "base-${terraform.workspace}"
+        namespace = "${terraform.workspace}"
       }
       syncPolicy = {
         automated = {

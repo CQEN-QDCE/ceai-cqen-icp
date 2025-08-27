@@ -179,6 +179,7 @@ ingress:
   tls: []
 
 ingressIcp:
+  enabled: false
   name: ingress-icp-alb
   class: alb
   annotations:
@@ -200,6 +201,13 @@ ingressIcp:
   serviceName: icp-test-env-svc
   servicePort: 8081
   servicePortName: icp-test-env-port
+
+serviceExt:
+  enabled: true
+  annotations:
+    domainName: 'icp-bidon.asea.cqen.ca'
+    subnetAllowList: ''
+    acmCertificateArn: ''
 
 replicaCount: 3
 
