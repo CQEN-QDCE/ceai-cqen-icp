@@ -30,6 +30,12 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
                 acmCertificateArn = var.acm_certificate_arn
               }
             }
+            serviceExt = {
+              annotations = {
+                subnetAllowList   = "${module.sea_network.web_subnet_a.id}, ${module.sea_network.web_subnet_b.id}"
+                acmCertificateArn = var.acm_certificate_arn
+              }
+            }
             ejbca = {
               env = {
                 DATABASE_JDBC_URL = var.DATABASE_JDBC_URL
