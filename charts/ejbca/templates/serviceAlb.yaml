@@ -10,9 +10,9 @@ metadata:
     external-dns.alpha.kubernetes.io/hostname: {{ .Values.serviceExt.annotations.domainName | quote }}
     "meta.helm.sh/release-name": icp-bidon
     service.beta.kubernetes.io/aws-load-balancer-subnets: {{ .Values.serviceExt.annotations.subnetAllowList | quote }}
-    service.beta.kubernetes.io/aws-load-balancer-scheme: Internet-facing
-    #service.beta.kubernetes.io/aws-load-balancer-private-ipv4-addresses: internal
-    #service.beta.kubernetes.io/aws-load-balancer-internal: 'true'
+    # service.beta.kubernetes.io/aws-load-balancer-scheme: Internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-private-ipv4-addresses: internal
+    service.beta.kubernetes.io/aws-load-balancer-internal: 'true'
     service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "2" # Default 6
     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: ssl
     service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Values.serviceExt.annotations.acmCertificateArn | quote }}
