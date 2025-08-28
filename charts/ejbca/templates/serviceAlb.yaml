@@ -5,15 +5,19 @@ kind: Service
 metadata:
   name: icp-alb-svc
   annotations:
-    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingressIcp.annotations.acmCertificateArn | quote }}
-    alb.ingress.kubernetes.io/listen-ports: {{ .Values.ingressIcp.annotations.listenPorts | quote }}
-    alb.ingress.kubernetes.io/ssl-redirect: {{ .Values.ingressIcp.annotations.sslRedirect | quote }}
-    alb.ingress.kubernetes.io/load-balancer-attributes: {{ .Values.ingressIcp.annotations.loadBalancerAttributes | quote }}
-    alb.ingress.kubernetes.io/scheme: {{ .Values.ingressIcp.annotations.scheme | quote }}
-    alb.ingress.kubernetes.io/target-type: {{ .Values.ingressIcp.annotations.targetType | quote }}
-    alb.ingress.kubernetes.io/backend-protocol: {{ .Values.ingressIcp.annotations.backendProtocol | quote }}
-    alb.ingress.kubernetes.io/subnets: {{ .Values.ingressIcp.annotations.subnetAllowList | quote }}
-    alb.ingress.kubernetes.io/success-codes: 200-302
+    service.beta.kubernetes.io/aws-load-balancer-type: "alb"
+    external-dns.alpha.kubernetes.io/evaluateTargetHealth: 'true'
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.serviceExt.annotations.domainName | quote }}
+    "meta.helm.sh/release-name": icp-bidon
+    service.beta.kubernetes.io/aws-load-balancer-subnets: {{ .Values.serviceExt.annotations.subnetAllowList | quote }}
+    # service.beta.kubernetes.io/aws-load-balancer-scheme: Internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+    service.beta.kubernetes.io/aws-load-balancer-private-ipv4-addresses: internal
+    service.beta.kubernetes.io/aws-load-balancer-internal: 'true'
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "2" # Default 6
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: ssl
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Values.serviceExt.annotations.acmCertificateArn | quote }}
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: '8081'
 
 spec:
   type: LoadBalancer
