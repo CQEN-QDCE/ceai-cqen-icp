@@ -18,7 +18,8 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: xroad-cs
+    matchLabels:
+      {{- include "ejbca.selectorLabels" . | nindent 6 }}
   ports:
     - port: 8081
       protocol: TCP

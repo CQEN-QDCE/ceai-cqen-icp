@@ -205,7 +205,7 @@ ingressIcp:
 serviceExt:
   enabled: true
   annotations:
-    domainName: 'icp-bidon.asea.cqen.ca'
+    domainName: 'icp-alpha.asea.cqen.ca'
     subnetAllowList: ''
     acmCertificateArn: ''
 
