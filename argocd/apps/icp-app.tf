@@ -15,7 +15,7 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
       }
     }
     spec = {
-      project = "${terraform.workspace}"
+      project = "base-${terraform.workspace}"
       source = {
         repoURL        = var.repo_github_url
         targetRevision = var.target_revision
@@ -48,7 +48,7 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
       }
       destination = {
         server    = "https://kubernetes.default.svc"
-        namespace = "${terraform.workspace}"
+        namespace = "base-${terraform.workspace}"
       }
       syncPolicy = {
         automated = {

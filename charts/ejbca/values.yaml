@@ -203,7 +203,7 @@ ingressIcp:
   servicePortName: icp-test-env-port
 
 serviceExt:
-  enabled: true
+  enabled: false
   annotations:
     domainName: 'icp-alpha.asea.cqen.ca'
     subnetAllowList: ''
