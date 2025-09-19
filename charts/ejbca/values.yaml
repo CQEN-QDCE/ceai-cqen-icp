@@ -179,7 +179,7 @@ ingress:
   tls: []
 
 ingressIcp:
-  enabled: false
+  enabled: true
   name: ingress-icp-alb
   class: alb
   annotations:
