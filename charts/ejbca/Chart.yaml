@@ -1,5 +1,5 @@
 apiVersion: v2
-name: ejbca-community
+name: icp
 description: Official Keyfactor EJBCA CE Chart
 type: application
 

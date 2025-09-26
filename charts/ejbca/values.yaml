@@ -209,7 +209,7 @@ serviceExt:
     subnetAllowList: ''
     acmCertificateArn: ''
 
-replicaCount: 3
+replicaCount: 1
 
 # https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 updateStrategy: {}
