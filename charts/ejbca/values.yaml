@@ -36,8 +36,8 @@ ejbca:
     # Audit logging should only be enabled in CA node
     LOG_AUDIT_TO_DB: false
     # INFO, DEBUG, TRACE, ERROR
-    LOG_LEVEL_APP: "INFO"
-    LOG_LEVEL_SERVER: "INFO"
+    LOG_LEVEL_APP: "DEBUG"
+    LOG_LEVEL_SERVER: "DEBUG"
 
     ## Observability
     # The IP address where port 8090 will listen for requests to /health, /health/ready,

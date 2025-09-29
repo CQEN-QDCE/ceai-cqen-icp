@@ -5,5 +5,6 @@ terraform {
     key                  = "projects/base/apps/icp/terraform.tfstate"
     region               = "ca-central-1"
     profile              = "xroad-preprod"   
+    #profile              = "dev-cqen"   
   }
 }
