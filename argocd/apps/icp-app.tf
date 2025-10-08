@@ -8,7 +8,8 @@ resource "kubernetes_manifest" "icp_app_of_apps" {
     kind       = "Application"
       metadata = {  
       name      = "icp-ejbca-${terraform.workspace}"
-      namespace = "argocd"
+      namespace = "argocd-${terraform.workspace}"
+      # namespace = "argocd"
       labels = {
         "app.kubernetes.io/name"    = "icp-ejbca-${terraform.workspace}"
         "app.kubernetes.io/part-of" = "xroad-${terraform.workspace}"
