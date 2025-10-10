@@ -157,3 +157,5 @@ _tmp/
 # Fichiers d'environnement
 .env
 *.env
+
+# Fin du fichier .gitignore
