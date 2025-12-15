@@ -138,3 +138,9 @@ _tmp/
 *.gzip
 *.xz
 *.lzma
+
+*.pem
+*.crt
+*.cer
+*.der
+*.csr

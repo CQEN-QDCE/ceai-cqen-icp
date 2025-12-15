@@ -1,0 +1,22 @@
+name: "Créer le tag de version"
+on:
+  push:
+    branches:
+      - feature/*
+      - release/*
+      - hotfix/*
+      - main
+      - dev
+jobs:
+  get_semver_version:
+    name: Calculer la version et appliquer le tag
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: write
+    steps:
+      - name: "Installe et initialise Terraform Cluster module - ${{  github.ref_name }}"
+        shell: bash
+        # This step refreshes the Terraform state with the current infrastructure state
+        run: |
+          ls -la
